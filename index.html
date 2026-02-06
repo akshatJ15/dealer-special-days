@@ -710,6 +710,18 @@
         renderTable(filtered);
     }
 
+    const monthOrder = {
+        Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+        Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12
+    };
+
+    function parseDateKey(dateStr) {
+        const parts = String(dateStr || '').trim().split(' ');
+        const day = Number(parts[0]) || 0;
+        const month = monthOrder[parts[1]] || 0;
+        return month * 100 + day;
+    }
+
     function renderTable(data) {
         const tbody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
@@ -722,7 +734,14 @@
             emptyState.style.display = 'none';
         }
 
-        data.forEach(item => {
+        const sortedData = [...data].sort((a, b) => {
+            const keyA = parseDateKey(a.date);
+            const keyB = parseDateKey(b.date);
+            if (keyA !== keyB) return keyA - keyB;
+            return String(a.name).localeCompare(String(b.name));
+        });
+
+        sortedData.forEach(item => {
             const row = document.createElement('tr');
             
             const icon = item.occasion === 'Birthday' ? '🎂' : '💍';

@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dealer Special Days Manager</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+            --bg-lighter: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --success-hover: #059669;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e0e7ff 100%);
+            color: var(--text);
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #1e3a8a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Controls Grid */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto auto;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease-out 0.1s both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input, select {
+            padding: 0.625rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.625rem;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.625rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #047857 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-icon {
+            padding: 0.625rem;
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--bg-lighter);
+            color: var(--primary);
+            transform: scale(1.15);
+        }
+
+        .btn-icon.delete:hover {
+            color: var(--danger);
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out 0.2s both;
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e3a8a 100%);
+            color: white;
+        }
+
+        th {
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            color: white;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f0f9ff;
+            box-shadow: inset 0 0 0 1px var(--primary);
+        }
+
+        .occasion-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .badge-birthday {
+            color: #d946ef;
+            font-weight: 700;
+        }
+
+        .badge-anniv {
+            color: #0ea5e9;
+            font-weight: 700;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #1e3a8a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.625rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            outline: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-cancel {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .btn-cancel:hover {
+            background: var(--bg-lighter);
+            border-color: var(--text-light);
+        }
+
+        #emptyState {
+            font-size: 1.1rem;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .controls {
+                grid-template-columns: 1fr 1fr;
+            }
+            .controls input {
+                grid-column: 1 / -1;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .modal {
+                padding: 1.5rem;
+                max-width: 90vw;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📅 Dealer Special Days</h1>
+                <p class="subtitle">Manage birthdays and anniversaries</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal()">
+                <span>➕</span> Add New
+            </button>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Search by name or firm..." onkeyup="filterData()">
+            
+            <select id="monthFilter" onchange="filterData()">
+                <option value="All">All Months</option>
+                <option value="Jan">Jan</option>
+                <option value="Feb">Feb</option>
+                <option value="Mar">Mar</option>
+                <option value="Apr">Apr</option>
+                <option value="May">May</option>
+                <option value="Jun">Jun</option>
+                <option value="Jul">Jul</option>
+                <option value="Aug">Aug</option>
+                <option value="Sep">Sep</option>
+                <option value="Oct">Oct</option>
+                <option value="Nov">Nov</option>
+                <option value="Dec">Dec</option>
+            </select>
+
+            <select id="occasionFilter" onchange="filterData()">
+                <option value="All">All Occasions</option>
+                <option value="Birthday">Birthday</option>
+                <option value="Anniversary">Anniversary</option>
+            </select>
+
+            <button class="btn btn-success" onclick="downloadCSV()">
+                <span>⬇️</span> CSV
+            </button>
+            
+            <button class="btn btn-cancel" onclick="resetData()" title="Reset to original list">
+                <span>🔄</span>
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Occasion</th>
+                        <th>Firm</th>
+                        <th>Name</th>
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div id="emptyState" style="padding: 3rem; text-align: center; color: var(--text-light); display: none;">
+                No records found.
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="entryModal">
+            <div class="modal">
+                <h2 class="modal-title" id="modalTitle">Add New Entry</h2>
+                <form id="entryForm" onsubmit="saveEntry(event)">
+                    <input type="hidden" id="entryId">
+                    
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="inputName" required placeholder="e.g. John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Firm Name</label>
+                        <input type="text" id="inputFirm" placeholder="e.g. ABC Traders">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Occasion</label>
+                        <select id="inputOccasion">
+                            <option value="Birthday">Birthday</option>
+                            <option value="Anniversary">Anniversary</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date (DD Mon)</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" id="inputDay" min="1" max="31" placeholder="DD" required style="width: 80px;">
+                            <select id="inputMonth" required>
+                                <option value="Jan">Jan</option>
+                                <option value="Feb">Feb</option>
+                                <option value="Mar">Mar</option>
+                                <option value="Apr">Apr</option>
+                                <option value="May">May</option>
+                                <option value="Jun">Jun</option>
+                                <option value="Jul">Jul</option>
+                                <option value="Aug">Aug</option>
+                                <option value="Sep">Sep</option>
+                                <option value="Oct">Oct</option>
+                                <option value="Nov">Nov</option>
+                                <option value="Dec">Dec</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Default Data Set
+    const defaultData = [
+        {id: 1, date: "22 Jan", occasion: "Birthday", firm: "Sarvang", name: "Samimap"},
+        {id: 2, date: "07 Dec", occasion: "Anniversary", firm: "Sarvang", name: "Samimap"},
+        {id: 3, date: "15 Oct", occasion: "Birthday", firm: "Pathak Plywood Bichpuri", name: "Saurabh Pathak"},
+        {id: 4, date: "04 Feb", occasion: "Anniversary", firm: "Pathak Plywood Bichpuri", name: "Saurabh Pathak"},
+        {id: 5, date: "15 Jan", occasion: "Birthday", firm: "Agrawal Paints Bichuri", name: "Girish Kumar Agrawal"},
+        {id: 6, date: "30 Nov", occasion: "Anniversary", firm: "Agrawal Paints Bichuri", name: "Girish Kumar Agrawal"},
+        {id: 7, date: "23 Sep", occasion: "Birthday", firm: "Bansal Paschimpuri", name: "Anshul Ji"},
+        {id: 8, date: "26 Jan", occasion: "Anniversary", firm: "Bansal Paschimpuri", name: "Anshul Ji"},
+        {id: 9, date: "12 Mar", occasion: "Birthday", firm: "Bansal Paschimpuri", name: "Udit Ji"},
+        {id: 10, date: "04 Mar", occasion: "Anniversary", firm: "Bansal Paschimpuri", name: "Udit Ji"},
+        {id: 11, date: "01 Mar", occasion: "Birthday", firm: "Balaji Traders Shashtripuram", name: "Mohit Agrawal"},
+        {id: 12, date: "15 Jan", occasion: "Anniversary", firm: "Balaji Traders Shashtripuram", name: "Mohit Agrawal"},
+        {id: 13, date: "05 Feb", occasion: "Birthday", firm: "Bhagwati Glass Bodla", name: "Suresh Kumar Ji"},
+        {id: 14, date: "29 Nov", occasion: "Anniversary", firm: "Bhagwati Glass Bodla", name: "Suresh Kumar Ji"},
+        {id: 15, date: "22 Sep", occasion: "Birthday", firm: "Aradhya Plywood Kalal Kheria", name: "Abhishek Rajawat"},
+        {id: 16, date: "05 Jun", occasion: "Anniversary", firm: "Aradhya Plywood Kalal Kheria", name: "Abhishek Rajawat"},
+        {id: 17, date: "20 Oct", occasion: "Birthday", firm: "BLG WOOD MART Shashtripuram", name: "Shivanshu Goyal"},
+        {id: 18, date: "12 Jun", occasion: "Birthday", firm: "Anuj Plywood & Hardware Kargil Agra", name: "Anuj Agrawal Ji"},
+        {id: 19, date: "21 Nov", occasion: "Birthday", firm: "Kavi Built Mart Shashtripuram", name: "Sachin Dixit Ji"},
+        {id: 20, date: "12 Nov", occasion: "Anniversary", firm: "Kavi Built Mart Shashtripuram", name: "Sachin Dixit Ji"},
+        {id: 21, date: "26 Jan", occasion: "Birthday", firm: "Shree Krishna Plywood & Hardware Bodla", name: "Akash Goyal Ji"},
+        {id: 22, date: "19 Jan", occasion: "Anniversary", firm: "Shree Krishna Plywood & Hardware Bodla", name: "Akash Goyal Ji"},
+        {id: 23, date: "14 Jun", occasion: "Birthday", firm: "Shree Krishna Plywood & Hardware Bodla", name: "Govind Goyal Ji"},
+        {id: 24, date: "07 Jul", occasion: "Anniversary", firm: "Shree Krishna Plywood & Hardware Bodla", name: "Govind Goyal Ji"},
+        {id: 25, date: "25 Mar", occasion: "Birthday", firm: "K.C Glass Shahganj", name: "Nikhil Ji"},
+        {id: 26, date: "26 Apr", occasion: "Anniversary", firm: "K.C Glass Shahganj", name: "Nikhil Ji"},
+        {id: 27, date: "07 Mar", occasion: "Birthday", firm: "Maheshwari Plywood Kargil", name: "Sameer"},
+        {id: 28, date: "21 Jan", occasion: "Anniversary", firm: "Maheshwari Plywood Kargil", name: "Sameer"},
+        {id: 29, date: "08 Aug", occasion: "Birthday", firm: "SPL", name: "GAURAV"},
+        {id: 30, date: "09 May", occasion: "Anniversary", firm: "SPL", name: "GAURAV"},
+        {id: 31, date: "29 Jan", occasion: "Birthday", firm: "SPL", name: "ARBAAZ"},
+        {id: 32, date: "07 Nov", occasion: "Birthday", firm: "SPL", name: "ROHIT"},
+        {id: 33, date: "23 Feb", occasion: "Anniversary", firm: "SPL", name: "ROHIT"},
+        {id: 34, date: "25 Aug", occasion: "Birthday", firm: "SPL", name: "CHOTU"},
+        {id: 35, date: "16 Apr", occasion: "Anniversary", firm: "SPL", name: "CHOTU"},
+        {id: 36, date: "06 Aug", occasion: "Birthday", firm: "SPL", name: "BIRJU"},
+        {id: 37, date: "01 May", occasion: "Anniversary", firm: "SPL", name: "BIRJU"},
+        {id: 38, date: "26 Jul", occasion: "Birthday", firm: "SPL", name: "ABHAY"},
+        {id: 39, date: "07 Sep", occasion: "Birthday", firm: "SPL", name: "MAYANK"},
+        {id: 40, date: "02 May", occasion: "Anniversary", firm: "SPL", name: "MAYANK"},
+        {id: 41, date: "14 Jul", occasion: "Birthday", firm: "SPL", name: "SUNNY"},
+        {id: 42, date: "16 Nov", occasion: "Anniversary", firm: "SPL", name: "SUNNY"},
+        {id: 43, date: "18 Aug", occasion: "Birthday", firm: "SPL", name: "HEERENDRA"},
+        {id: 44, date: "21 Jan", occasion: "Anniversary", firm: "SPL", name: "HEERENDRA"},
+        {id: 45, date: "12 Nov", occasion: "Birthday", firm: "Maa Kela Devi Traders", name: "Shubham Ji"},
+        {id: 46, date: "06 Mar", occasion: "Anniversary", firm: "Maa Kela Devi Traders", name: "Shubham Ji"},
+        {id: 47, date: "19 Sep", occasion: "Birthday", firm: "Maa Kela Devi Traders", name: "Harshit Ji"},
+        {id: 48, date: "04 May", occasion: "Anniversary", firm: "Maa Kela Devi Traders", name: "Harshit Ji"},
+        {id: 49, date: "27 Nov", occasion: "Birthday", firm: "Dhakad Enterprises New Agra", name: "Deepak Ji"},
+        {id: 50, date: "22 Apr", occasion: "Anniversary", firm: "Dhakad Enterprises New Agra", name: "Deepak Ji"},
+        {id: 51, date: "24 May", occasion: "Birthday", firm: "Agrawal Ply Mahal", name: "Amit Agrawal Ji"},
+        {id: 52, date: "04 Dec", occasion: "Anniversary", firm: "Agrawal Ply Mahal", name: "Amit Agrawal Ji"},
+        {id: 53, date: "10 Jun", occasion: "Birthday", firm: "R S Traders", name: "Raghvendra Ji"},
+        {id: 54, date: "18 Feb", occasion: "Anniversary", firm: "R S Traders", name: "Raghvendra Ji"},
+        {id: 55, date: "11 Feb", occasion: "Birthday", firm: "Ply World", name: "Yash Ji"},
+        {id: 56, date: "25 Feb", occasion: "Anniversary", firm: "Ply World", name: "Yash Ji"},
+        {id: 57, date: "24 Apr", occasion: "Birthday", firm: "Ankit Enterprises Rambagh", name: "Sahil Ji"},
+        {id: 58, date: "05 Apr", occasion: "Birthday", firm: "Shree Gopal Hardware Balkeshwar", name: "Ayush Ji"},
+        {id: 59, date: "29 Jan", occasion: "Anniversary", firm: "Shree Gopal Hardware Balkeshwar", name: "Ayush Ji"},
+        {id: 60, date: "04 Jan", occasion: "Birthday", firm: "Krishna Udhyog Kamla Nagar", name: "Goldie Ji"},
+        {id: 61, date: "06 Feb", occasion: "Anniversary", firm: "Krishna Udhyog Kamla Nagar", name: "Goldie Ji"},
+        {id: 62, date: "05 Mar", occasion: "Anniversary", firm: "Chand Plywood Tedi Bagiya", name: "Saddam Ji"},
+        {id: 63, date: "10 Aug", occasion: "Birthday", firm: "Suneel Plywood And Hardware Fatehabad Road", name: "Ghanshyam Ji"},
+        {id: 64, date: "07 May", occasion: "Anniversary", firm: "Suneel Plywood And Hardware Fatehabad Road", name: "Ghanshyam Ji"},
+        {id: 65, date: "08 Oct", occasion: "Birthday", firm: "Dixit Plywood Near Ekta Police Chauki", name: "C P Dixit Ji"},
+        {id: 66, date: "04 Feb", occasion: "Anniversary", firm: "Dixit Plywood Near Ekta Police Chauki", name: "C P Dixit Ji"},
+        {id: 67, date: "28 Dec", occasion: "Birthday", firm: "Goyal Building Material Maruti City", name: "Rinkesh Ji"},
+        {id: 68, date: "19 Jun", occasion: "Anniversary", firm: "Goyal Building Material Maruti City", name: "Rinkesh Ji"},
+        {id: 69, date: "18 Jul", occasion: "Birthday", firm: "Rashmi Plywood And Hardware Shamshabad Road", name: "Prashant Ji"},
+        {id: 70, date: "06 Aug", occasion: "Birthday", firm: "Hardik Plywood Rajpur Chungi", name: "Sunil Ji"},
+        {id: 71, date: "13 Apr", occasion: "Anniversary", firm: "Hardik Plywood Rajpur Chungi", name: "Sunil Ji"},
+        {id: 72, date: "14 Nov", occasion: "Birthday", firm: "Jwelco Plywood Rajpur Chungi", name: "Lucky Ji"},
+        {id: 73, date: "22 Jan", occasion: "Birthday", firm: "D K Timber Near Shankar Green", name: "Shanu Ji"},
+        {id: 74, date: "30 Apr", occasion: "Anniversary", firm: "D K Timber Near Shankar Green", name: "Shanu Ji"},
+        {id: 75, date: "16 Dec", occasion: "Birthday", firm: "S N Plywoods Sikandra", name: "Gaurav Ji"},
+        {id: 76, date: "02 Jun", occasion: "Anniversary", firm: "S N Plywoods Sikandra", name: "Gaurav Ji"},
+        {id: 77, date: "27 Nov", occasion: "Birthday", firm: "Shivay Plywood Shashtripuram", name: "Shivay Ji"},
+        {id: 78, date: "04 Dec", occasion: "Anniversary", firm: "Shivay Plywood Shashtripuram", name: "Shivay Ji"},
+        {id: 79, date: "13 Mar", occasion: "Birthday", firm: "Sachdeva Glass Maruti State Bodla", name: "Tarun Sachdeva Ji"},
+        {id: 80, date: "19 Jan", occasion: "Anniversary", firm: "Sachdeva Glass Maruti State Bodla", name: "Tarun Sachdeva Ji"},
+        {id: 81, date: "11 Oct", occasion: "Birthday", firm: "Mittal Paint & Plywood Alwatiya Road", name: "Naveen Mittal Ji"},
+        {id: 82, date: "06 May", occasion: "Anniversary", firm: "Mittal Paint & Plywood Alwatiya Road", name: "Naveen Mittal Ji"},
+        {id: 83, date: "20 Aug", occasion: "Birthday", firm: "Kanhaiya Plywood Bichpuri", name: "Vikas Jain Ji"},
+        {id: 84, date: "16 Jan", occasion: "Anniversary", firm: "Kanhaiya Plywood Bichpuri", name: "Vikas Jain Ji"},
+        {id: 85, date: "24 May", occasion: "Birthday", firm: "Agarwal Ply Mahal Hardware", name: "Amit Garg"},
+        {id: 86, date: "07 Oct", occasion: "Birthday", firm: "Amit Furnishers And Decorators", name: "Amit Kumar"},
+        {id: 87, date: "15 Aug", occasion: "Birthday", firm: "Aradhya Plywood", name: "Abhishek Rajawat"},
+        {id: 88, date: "15 Apr", occasion: "Birthday", firm: "Arihant Plywood & Hradware", name: "Anupam Jain"},
+        {id: 89, date: "20 Oct", occasion: "Birthday", firm: "B.L.G. Wood Mart", name: "Shivanshu"},
+        {id: 90, date: "18 May", occasion: "Birthday", firm: "Balaji Plywood Store & Glass", name: "Sonu"},
+        {id: 91, date: "05 Mar", occasion: "Birthday", firm: "Dwarika Nath Amar Nath", name: "Avirag Gupta"},
+        {id: 92, date: "25 Jun", occasion: "Birthday", firm: "Fauji Plywood And Hradware", name: "Raghvendra Singh Chauhan"},
+        {id: 93, date: "20 Jan", occasion: "Birthday", firm: "Govind Plywood", name: "Govind Garg"},
+        {id: 94, date: "10 Mar", occasion: "Birthday", firm: "Goypal Plywood", name: "Varun Goyal"},
+        {id: 95, date: "04 Aug", occasion: "Birthday", firm: "S.N.PLYWOOD & LAMINATES", name: "SAUDAN SINGH BHAGEL"},
+        {id: 96, date: "01 Aug", occasion: "Birthday", firm: "", name: "DINESH SHARMA"},
+        {id: 97, date: "19 Jan", occasion: "Birthday", firm: "K D PLYWOOD & HARDWARE", name: "MUKESH RAJPUT"},
+        {id: 98, date: "24 Oct", occasion: "Birthday", firm: "M/S VARDHMAN PLYWOOD & HARDWEAR STORE", name: "YOGESH JAIN"},
+        {id: 99, date: "04 Jun", occasion: "Birthday", firm: "M/S BRIJ HARDWARE & PLYWOOD", name: "ANURAG BANSAL"},
+        {id: 100, date: "03 Sep", occasion: "Birthday", firm: "M/S NAWAL AGENCIES", name: "ATUL AGARWAL"},
+        {id: 101, date: "04 Jun", occasion: "Birthday", firm: "M/S JINDAL ENTERPRISES", name: "NEERAJ JINDAL"},
+        {id: 102, date: "18 Mar", occasion: "Birthday", firm: "GUPTA PLYWOOD AND HARDWARE", name: "PRAKASH CHAND GUPTA"},
+        {id: 103, date: "10 Mar", occasion: "Birthday", firm: "GOYAL PLYWOOD", name: "VARUN GOYAL"},
+        {id: 104, date: "24 May", occasion: "Birthday", firm: "AGRAWAL PLY MAHAL HARDWARE", name: "AMIT GARG"},
+        {id: 105, date: "01 Sep", occasion: "Birthday", firm: "M/S GUPTA HARDWARE STORE", name: "AKHLESH GUPTA"},
+        {id: 106, date: "02 Dec", occasion: "Birthday", firm: "SUNIL PLYBOARD AND HARDWARE", name: "GHANSHYAM LODHI"},
+        {id: 107, date: "26 Jun", occasion: "Birthday", firm: "M/S AGARWAL PLYBOARD & HARDWARE STORE", name: "NAVIN AGRAWAL"},
+        {id: 108, date: "20 Oct", occasion: "Birthday", firm: "M/S SAI RAM BANSAL TIMBER", name: "ALOK BANSAL"},
+        {id: 109, date: "10 Jul", occasion: "Birthday", firm: "SHRI JI PLYWOOD", name: "MADHUR GUPTA"},
+        {id: 110, date: "15 Apr", occasion: "Birthday", firm: "Arihant Plywood & Hardware", name: "ANUPAM JAIN"},
+        {id: 111, date: "05 Apr", occasion: "Birthday", firm: "SHREE GOPAL HARDWARE", name: "AYUSH KUMAR"},
+        {id: 112, date: "02 Jun", occasion: "Birthday", firm: "VKAK HARDWARE STORE", name: "ABHINAV"},
+        {id: 113, date: "23 Jun", occasion: "Birthday", firm: "M/S SINGHAL HARDWARE AND PLYWOOD", name: "HARSHIT AGRAWAL"},
+        {id: 114, date: "19 Jun", occasion: "Birthday", firm: "M/S OM SAIRAM PLYWOOD AND HARDWARE STORE", name: "SUNNY GUPTA"},
+        {id: 115, date: "26 Feb", occasion: "Birthday", firm: "SHUBHAM JAIN HARDWARE AND PLYWOOD", name: "SHUBHAM JAIN"},
+        {id: 116, date: "22 Aug", occasion: "Birthday", firm: "ARADHYA PLYWOOD", name: "ABHISHEK RAJAVAT"},
+        {id: 117, date: "28 Dec", occasion: "Birthday", firm: "M/S GOYAL BUILDING MATERIAL", name: "RINKESH GOYAL"},
+        {id: 118, date: "02 Jan", occasion: "Birthday", firm: "KUNAL PLYWOOD AND HARDWARE", name: "ANIL SHARMA"},
+        {id: 119, date: "05 Mar", occasion: "Birthday", firm: "DWARIKA NATH AMAR NATH", name: "AVIRAG GUPTA"},
+        {id: 120, date: "31 Jul", occasion: "Birthday", firm: "M/S Prajapati Hardwares", name: "LALIT PRAJAPATI"},
+        {id: 121, date: "10 Jul", occasion: "Birthday", firm: "Amit Glass and Hardware", name: "AMIT KUMAR"},
+        {id: 122, date: "16 Nov", occasion: "Birthday", firm: "M/S NATIONAL PLY BOARD AND HARDWARE", name: "ABDUL AHAD"},
+        {id: 123, date: "20 Jan", occasion: "Birthday", firm: "GOVIND PLYWOOD", name: "GOVIND GARG"},
+        {id: 124, date: "28 Sep", occasion: "Birthday", firm: "VRINDAVAN A STORE", name: "AMOL AGRAWAL"},
+        {id: 125, date: "01 Mar", occasion: "Birthday", firm: "M/S BALAJI TRADERS", name: "MOHIT AGGRWAL"},
+        {id: 126, date: "25 Mar", occasion: "Birthday", firm: "M/S K.C. GLASS & PLYWOOD CO.", name: "NIKHIL SEERNANI"},
+        {id: 127, date: "18 Jul", occasion: "Birthday", firm: "M/S RASHMI HARDWARE & PLYWOOD", name: "PRASHANT ARELA"},
+        {id: 128, date: "13 Mar", occasion: "Birthday", firm: "SHRI SHYAM PLYWOOD & HARDWARE", name: "VIKASH BANSAL"},
+        {id: 129, date: "20 Oct", occasion: "Birthday", firm: "B.L.G. WOOD MART", name: "SHIVANSHU"},
+        {id: 130, date: "11 May", occasion: "Birthday", firm: "MODI PLYWOOD", name: "GUKLESH"},
+        {id: 131, date: "18 May", occasion: "Birthday", firm: "BALA JI PLYWOOD STORE AND GLASS", name: "SONU"},
+        {id: 132, date: "22 May", occasion: "Birthday", firm: "MICA WORLD", name: "SACHIN AGARWAL"},
+        {id: 133, date: "25 Jun", occasion: "Birthday", firm: "FAUJI PLYWOOD AND HARDWARE", name: "RAGHAVENDRA SINGH"}
+    ];
+
+    let dealerData = [];
+
+    // Initialize
+    window.onload = function() {
+        const saved = localStorage.getItem('dealerData');
+        if (saved) {
+            dealerData = JSON.parse(saved);
+        } else {
+            // Assign IDs to default data if not present (handled in definition, but safety check)
+            dealerData = [...defaultData];
+        }
+        filterData();
+    };
+
+    function saveDataLocally() {
+        localStorage.setItem('dealerData', JSON.stringify(dealerData));
+        filterData();
+    }
+
+    function resetData() {
+        if(confirm("Are you sure? This will delete all custom entries and restore the original list.")) {
+            dealerData = [...defaultData];
+            saveDataLocally();
+        }
+    }
+
+    function filterData() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        const monthFilter = document.getElementById('monthFilter').value;
+        const occasionFilter = document.getElementById('occasionFilter').value;
+
+        const filtered = dealerData.filter(item => {
+            const matchesSearch = 
+                item.name.toLowerCase().includes(searchText) || 
+                item.firm.toLowerCase().includes(searchText);
+
+            let matchesMonth = true;
+            if (monthFilter !== 'All') {
+                matchesMonth = item.date.includes(monthFilter);
+            }
+
+            let matchesOccasion = true;
+            if (occasionFilter !== 'All') {
+                matchesOccasion = item.occasion === occasionFilter;
+            }
+
+            return matchesSearch && matchesMonth && matchesOccasion;
+        });
+
+        renderTable(filtered);
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+        } else {
+            emptyState.style.display = 'none';
+        }
+
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            
+            const icon = item.occasion === 'Birthday' ? '🎂' : '💍';
+            const badgeClass = item.occasion === 'Birthday' ? 'badge-birthday' : 'badge-anniv';
+
+            row.innerHTML = `
+                <td>${item.date}</td>
+                <td>
+                    <div class="occasion-cell ${badgeClass}">
+                        <span>${icon}</span>
+                        ${item.occasion}
+                    </div>
+                </td>
+                <td style="font-weight: 500;">${item.firm}</td>
+                <td style="color: var(--text-light);">${item.name}</td>
+                <td>
+                    <div class="actions-cell">
+                        <button class="btn-icon" onclick="openModal('${item.id}')" title="Edit">✏️</button>
+                        <button class="btn-icon delete" onclick="deleteEntry('${item.id}')" title="Delete">🗑️</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // Modal & Form Logic
+    function openModal(id = null) {
+        const modal = document.getElementById('entryModal');
+        const title = document.getElementById('modalTitle');
+        const form = document.getElementById('entryForm');
+
+        modal.style.display = 'flex';
+        form.reset();
+
+        if (id) {
+            title.textContent = 'Edit Entry';
+            // Convert id to string for comparison
+            id = String(id).trim();
+            const entry = dealerData.find(d => String(d.id).trim() === id);
+            
+            if (!entry) {
+                console.error('Entry not found:', id);
+                closeModal();
+                return;
+            }
+            
+            console.log('Editing entry:', entry);
+            
+            document.getElementById('entryId').value = entry.id;
+            document.getElementById('inputName').value = entry.name;
+            document.getElementById('inputFirm').value = entry.firm;
+            document.getElementById('inputOccasion').value = entry.occasion;
+            
+            // Split date (e.g., "22 Jan")
+            const [day, month] = entry.date.split(' ');
+            document.getElementById('inputDay').value = day;
+            document.getElementById('inputMonth').value = month;
+        } else {
+            title.textContent = 'Add New Entry';
+            document.getElementById('entryId').value = '';
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('entryModal').style.display = 'none';
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        const modal = document.getElementById('entryModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    function saveEntry(e) {
+        e.preventDefault();
+        
+        const idStr = String(document.getElementById('entryId').value).trim();
+        const name = document.getElementById('inputName').value;
+        const firm = document.getElementById('inputFirm').value;
+        const occasion = document.getElementById('inputOccasion').value;
+        
+        // Format date logic
+        const day = document.getElementById('inputDay').value.padStart(2, '0');
+        const month = document.getElementById('inputMonth').value;
+        const dateStr = `${day} ${month}`;
+
+        if (idStr && idStr !== '') {
+            // Edit existing - convert string to string for comparison
+            const index = dealerData.findIndex(d => String(d.id).trim() === idStr);
+            if (index !== -1) {
+                dealerData[index] = { 
+                    id: dealerData[index].id,
+                    date: dateStr, 
+                    occasion: occasion, 
+                    firm: firm, 
+                    name: name 
+                };
+                console.log('Entry updated - ID:', idStr);
+                alert('Entry updated successfully!');
+            } else {
+                console.error('Entry index not found for id:', idStr);
+                alert('Error: Entry not found');
+            }
+        } else {
+            // Add new
+            const newEntry = {
+                id: Date.now(), // simple unique ID
+                date: dateStr,
+                occasion: occasion,
+                firm: firm,
+                name: name
+            };
+            dealerData.unshift(newEntry); // Add to top
+            console.log('New entry added:', newEntry.id);
+            alert('New entry added successfully!');
+        }
+
+        saveDataLocally();
+        closeModal();
+    }
+
+    function deleteEntry(id) {
+        // Ensure id is a string for comparison
+        id = String(id).trim();
+        
+        console.log('Delete attempt for id:', id, 'Type:', typeof id);
+        
+        if(confirm('Are you sure you want to delete this entry?')) {
+            console.log('Delete confirmed for id:', id);
+            
+            const initialLength = dealerData.length;
+            console.log('Initial data length:', initialLength);
+            
+            // Filter out the entry with matching id (comparing as strings)
+            dealerData = dealerData.filter(item => {
+                const itemId = String(item.id).trim();
+                const matches = itemId === id;
+                console.log('Comparing:', itemId, '===', id, '?', matches);
+                return !matches; // Return true to KEEP the item
+            });
+            
+            console.log('Data length after filter:', dealerData.length);
+            
+            if (dealerData.length < initialLength) {
+                console.log('✓ Entry deleted successfully');
+                saveDataLocally();
+                alert('Entry deleted successfully!');
+            } else {
+                console.error('✗ Entry not found for deletion:', id);
+                alert('Error: Entry not found or could not be deleted');
+            }
+        } else {
+            console.log('Delete cancelled');
+        }
+    }
+
+    function downloadCSV() {
+        // Get current filtered data to respect what user sees
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        const monthFilter = document.getElementById('monthFilter').value;
+        const occasionFilter = document.getElementById('occasionFilter').value;
+
+        const filteredData = dealerData.filter(item => {
+            const matchesSearch = 
+                item.name.toLowerCase().includes(searchText) || 
+                item.firm.toLowerCase().includes(searchText);
+            const matchesMonth = monthFilter === 'All' || item.date.includes(monthFilter);
+            const matchesOccasion = occasionFilter === 'All' || item.occasion === occasionFilter;
+            return matchesSearch && matchesMonth && matchesOccasion;
+        });
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Date,Occasion,Firm,Name\n";
+
+        filteredData.forEach(row => {
+            const firm = row.firm.includes(',') ? `"${row.firm}"` : row.firm;
+            const name = row.name.includes(',') ? `"${row.name}"` : row.name;
+            csvContent += `${row.date},${row.occasion},${firm},${name}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "dealer_special_days.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
